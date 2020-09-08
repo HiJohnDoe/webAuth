@@ -21,8 +21,18 @@ namespace webAuth
             InitializeComponent();
         }
         
+        
+
         private void Form1_Load(object sender, EventArgs e)
         {
+            /// <summary>
+            /// 限制启动一次
+            /// </summary>
+            System.Diagnostics.Process[] processes = System.Diagnostics.Process.GetProcessesByName(Application.CompanyName);
+            if (processes.Length > 1)
+            {
+                System.Environment.Exit(1);
+            }
             comboBox_username.Focus();
             do_remember_load();
             Form1_Shown();
@@ -272,7 +282,6 @@ namespace webAuth
 
         private void checkBox_autostart_CheckedChanged(object sender, EventArgs e)
         {
-            string exefullpath = typeof(Program).Assembly.Location;
             if (this.checkBox_autostart.Checked)    //如果选择了记住密码功能，就在文件中保存密码
             {
                 autoStart autoStart = new autoStart();
