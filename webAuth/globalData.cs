@@ -11,6 +11,7 @@ namespace webAuth
         public static string[] login_status_arr;
         public static string user_name, user_password;
         public static string login_cookie;
-        public static bool reload =  false;
+        public static bool keeplive_exit = false;
+        public static bool auto_login = true;
     }
 }

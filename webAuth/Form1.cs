@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Net;
@@ -21,8 +22,11 @@ namespace webAuth
             InitializeComponent();
         }
         
-        
-
+        /// <summary>
+        /// 窗口加载事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Form1_Load(object sender, EventArgs e)
         {
             /// <summary>
@@ -38,19 +42,28 @@ namespace webAuth
             Form1_Shown();
         }
 
+        /// <summary>
+        /// 窗口加载完毕事件
+        /// </summary>
         private async void Form1_Shown()
         {
             await Task.Delay(1000);
             if (checkBox_autologin.Checked == true)
             {
-                if (globalData.reload == false)
+                if (globalData.auto_login == true)
                 {
+                    globalData.auto_login = false;
                     button_login.PerformClick();
                 }
             }
         }
         private Dictionary<string, User> users = new Dictionary<string, User>();
 
+        /// <summary>
+        /// 登录按钮点击事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button_login_Click(object sender, EventArgs e)
         {
             bool is_exist_name = string.IsNullOrEmpty(comboBox_username.Text.Trim());
@@ -84,7 +97,17 @@ namespace webAuth
             if ( flag_name && flag_pwd)
             {
                 string ip = GetLocalIp();
-                string login_status = login_action(ip);
+                string err_status_0 = "无法连接到远程服务器";
+                string err_status_1 = "请求被中止: 操作超时。";
+                string err_status_2 = "操作超时";
+                string err_status_3 = "无法连接到远程服务器";
+                string login_status = err_status_0;
+                while (login_status == err_status_0 || login_status == err_status_1 || login_status == err_status_2 || login_status == err_status_3)
+                {
+                    login_status = login_action(ip);
+                    Thread.Sleep(3000);
+                }
+                
                 globalData.login_cookie = login_status;
                 bool is_exsit = login_status.Contains("0#");
                 if (is_exsit)
@@ -103,6 +126,7 @@ namespace webAuth
                 }else
                 {
                     globalData.login_status_arr = login_status.Split('&');
+                    globalData.keeplive_exit = false;
                     Form2 f2 = new Form2();
                     f2.Show();
                     this.Hide();
@@ -110,6 +134,11 @@ namespace webAuth
             }
         }
 
+        /// <summary>
+        /// 登录动作
+        /// </summary>
+        /// <param name="ip"></param>
+        /// <returns></returns>
         private string login_action(string ip)
         {
             Encoding encoding = Encoding.UTF8;
@@ -131,8 +160,19 @@ namespace webAuth
             request.Headers.Add("DNT", "1");
             request.Headers.Add("X-Requested-With", "XMLHttpRequest");
             request.ContentLength = data.Length;
-            Stream newStream = request.GetRequestStream();
+            request.Proxy = null;
+            request.Timeout = 3000;
 
+            Stream newStream;
+            try
+            {
+                newStream = request.GetRequestStream();
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;    // 无法连接到远程服务器
+            }
+            
             //Send the data
             newStream.Write(data, 0, data.Length);
             newStream.Close();
@@ -148,12 +188,22 @@ namespace webAuth
             return loginStatus;
         }
 
+        /// <summary>
+        /// 分割登录反馈
+        /// </summary>
+        /// <param name="login_Status"></param>
+        /// <returns></returns>
         private string[] getSplitRes(string login_Status)
         {
             string[] loginStatusArr = login_Status.Split('&');
             return loginStatusArr;
         }
 
+        /// <summary>
+        /// 显示密码check事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void checkBox_showpwd_CheckedChanged(object sender, EventArgs e)
         {
             if (checkBox_showpwd.Checked)
@@ -230,6 +280,11 @@ namespace webAuth
             }
         }
 
+        /// <summary>
+        /// 当用户名发生改变时的时间
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void comboBox_username_SelectedValueChanged(object sender, EventArgs e)   //点击ComboBox显示对应的密码
         {
             FileStream fs = new FileStream("C:\\Users\\Public\\Documents\\webAuth.bin", FileMode.OpenOrCreate);   //首先读取记住密码的配置文件
@@ -261,6 +316,10 @@ namespace webAuth
             fs.Close();
         }
 
+        /// <summary>
+        /// 读取本机IP
+        /// </summary>
+        /// <returns></returns>
         public string GetLocalIp()
         {
             ///获取本地的IP地址
@@ -275,11 +334,21 @@ namespace webAuth
             return AddressIP;
         }
 
+        /// <summary>
+        /// 关闭事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
             System.Environment.Exit(0);
         }
 
+        /// <summary>
+        /// 自动登录按钮改变事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void checkBox_autostart_CheckedChanged(object sender, EventArgs e)
         {
             if (this.checkBox_autostart.Checked)    //如果选择了记住密码功能，就在文件中保存密码

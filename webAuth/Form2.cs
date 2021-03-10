@@ -27,7 +27,18 @@ namespace webAuth
         private void timer1_Tick(object sender, EventArgs e)
         {
             TimeSpan dtTo = DateTime.Now - dt_start;
-            label_keeplive_times.Text = dtTo.Hours.ToString() + ":" + dtTo.Minutes.ToString() + ":" + dtTo.Seconds;
+            if (dtTo.Days >0)
+            {
+                label_keeplive_times.Text = dtTo.Days.ToString() + "天 " + dtTo.Hours.ToString() + "小时 " + dtTo.Minutes.ToString() + "分 " + dtTo.Seconds + "秒";
+            }
+            else
+            {
+                label_keeplive_times.Text = dtTo.Hours.ToString() + "小时 " + dtTo.Minutes.ToString() + "分 " + dtTo.Seconds + "秒";
+            }
+            if(globalData.keeplive_exit)
+            {
+                button_logout.PerformClick();
+            }
         }
 
 
@@ -44,10 +55,21 @@ namespace webAuth
 
         private void keep_live()
         {
-            while (true)
+            string err_status_1 = "请求被中止: 操作超时。";
+            string err_status_2 = "操作超时";
+            string err_status_3 = "无法连接到远程服务器";
+            keeplive_status = err_status_1;
+
+            while (!globalData.keeplive_exit)
             {
-                Thread.Sleep(149000);// 休眠149秒后， 发送keeplive保持激活状态
+                //Thread.Sleep(90000);// 休眠90秒后， 发送keeplive保持激活状态
+                Thread.Sleep(5000);// 休眠5秒后， 发送keeplive保持激活状态 debug用
                 keeplive_status = keep_live_action(login_status_arr);
+                if (keeplive_status == err_status_1 || keeplive_status == err_status_2 || keeplive_status == err_status_3)
+                {
+                    globalData.keeplive_exit = true;
+                    globalData.auto_login = true;
+                }
             }
         }
         
@@ -73,20 +95,34 @@ namespace webAuth
             request.Headers.Add("DNT", "1");
             request.Headers.Add("X-Requested-With", "XMLHttpRequest");
             request.ContentLength = data.Length;
-            Stream newStream = request.GetRequestStream();
+            request.Proxy = null;
+            request.Timeout = 3000;
 
-            //Send the data
-            newStream.Write(data, 0, data.Length);
-            newStream.Close();
+            string keepliveStatus;
+            try
+            {
+                Stream newStream = request.GetRequestStream();
+            
+                //Send the data
+                newStream.Write(data, 0, data.Length);
+                newStream.Close();
 
-            //Get response
-            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-            Stream myResponseStream = response.GetResponseStream();
-            StreamReader myStreamReader = new StreamReader(myResponseStream, encoding);
-            string keepliveStatus = myStreamReader.ReadToEnd();
-            myStreamReader.Close();
-            myResponseStream.Close();
+                //Get response
+                HttpWebResponse response;
 
+                response = (HttpWebResponse)request.GetResponse();
+
+                Stream myResponseStream = response.GetResponseStream();
+                StreamReader myStreamReader = new StreamReader(myResponseStream, encoding);
+                keepliveStatus = myStreamReader.ReadToEnd();
+                myStreamReader.Close();
+                myResponseStream.Close();
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;    // 请求被中止: 操作超时。
+            }
+            
             return keepliveStatus;
         }
 
@@ -123,9 +159,10 @@ namespace webAuth
         private void button_logout_Click(object sender, EventArgs e)
         {
             string logout_status = logout_action(login_status_arr);
-            globalData.reload = true;
+            globalData.keeplive_exit = true;
             Form1 f1 = new Form1();
             this.Dispose();
+            this.Close();
             f1.Show();
         }
 
@@ -150,20 +187,30 @@ namespace webAuth
             request.Headers.Add("DNT", "1");
             request.Headers.Add("X-Requested-With", "XMLHttpRequest");
             request.ContentLength = data.Length;
-            Stream newStream = request.GetRequestStream();
+            request.Proxy = null;
+            request.Timeout = 3000;
 
-            //Send the data
-            newStream.Write(data, 0, data.Length);
-            newStream.Close();
+            string keepliveStatus;
+            try
+            {
+                Stream newStream = request.GetRequestStream();
 
-            //Get response
-            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-            Stream myResponseStream = response.GetResponseStream();
-            StreamReader myStreamReader = new StreamReader(myResponseStream, encoding);
-            string keepliveStatus = myStreamReader.ReadToEnd();
-            myStreamReader.Close();
-            myResponseStream.Close();
+                //Send the data
+                newStream.Write(data, 0, data.Length);
+                newStream.Close();
 
+                //Get response
+                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+                Stream myResponseStream = response.GetResponseStream();
+                StreamReader myStreamReader = new StreamReader(myResponseStream, encoding);
+                keepliveStatus = myStreamReader.ReadToEnd();
+                myStreamReader.Close();
+                myResponseStream.Close();
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;    // 请求被中止: 操作超时。
+            }
             return keepliveStatus;
         }
 

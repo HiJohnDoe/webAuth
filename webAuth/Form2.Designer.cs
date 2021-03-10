@@ -48,9 +48,9 @@
             this.panel_logout.Controls.Add(this.label_keeplive_times);
             this.panel_logout.Controls.Add(this.label_timetip);
             this.panel_logout.Controls.Add(this.button_logout);
-            this.panel_logout.Location = new System.Drawing.Point(29, 84);
+            this.panel_logout.Location = new System.Drawing.Point(29, 136);
             this.panel_logout.Name = "panel_logout";
-            this.panel_logout.Size = new System.Drawing.Size(311, 179);
+            this.panel_logout.Size = new System.Drawing.Size(311, 127);
             this.panel_logout.TabIndex = 2;
             // 
             // label_keeplive_times
@@ -59,7 +59,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.label_keeplive_times.AutoSize = true;
             this.label_keeplive_times.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label_keeplive_times.Location = new System.Drawing.Point(143, 50);
+            this.label_keeplive_times.Location = new System.Drawing.Point(135, 11);
             this.label_keeplive_times.Name = "label_keeplive_times";
             this.label_keeplive_times.Size = new System.Drawing.Size(0, 18);
             this.label_keeplive_times.TabIndex = 0;
@@ -67,21 +67,23 @@
             // label_timetip
             // 
             this.label_timetip.AutoSize = true;
-            this.label_timetip.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label_timetip.Location = new System.Drawing.Point(40, 52);
+            this.label_timetip.Font = new System.Drawing.Font("华光标题宋_CNKI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label_timetip.Location = new System.Drawing.Point(40, 11);
             this.label_timetip.Name = "label_timetip";
-            this.label_timetip.Size = new System.Drawing.Size(88, 16);
+            this.label_timetip.Size = new System.Drawing.Size(89, 20);
             this.label_timetip.TabIndex = 5;
             this.label_timetip.Text = "在线时长：";
             this.label_timetip.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // button_logout
             // 
-            this.button_logout.Font = new System.Drawing.Font("宋体", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.button_logout.Location = new System.Drawing.Point(118, 125);
+            this.button_logout.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.button_logout.Font = new System.Drawing.Font("华光报宋_CNKI", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.button_logout.ForeColor = System.Drawing.SystemColors.InactiveCaptionText;
+            this.button_logout.Location = new System.Drawing.Point(111, 61);
             this.button_logout.Name = "button_logout";
             this.button_logout.Size = new System.Drawing.Size(98, 41);
-            this.button_logout.TabIndex = 1;
+            this.button_logout.TabIndex = 2;
             this.button_logout.Text = "注销";
             this.button_logout.UseVisualStyleBackColor = true;
             this.button_logout.Click += new System.EventHandler(this.button_logout_Click);
@@ -89,7 +91,7 @@
             // panel_logo
             // 
             this.panel_logo.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("panel_logo.BackgroundImage")));
-            this.panel_logo.Location = new System.Drawing.Point(72, 12);
+            this.panel_logo.Location = new System.Drawing.Point(63, 37);
             this.panel_logo.Name = "panel_logo";
             this.panel_logo.Size = new System.Drawing.Size(244, 66);
             this.panel_logo.TabIndex = 4;
@@ -131,7 +133,9 @@
             this.Controls.Add(this.panel_logout);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
+            this.MaximumSize = new System.Drawing.Size(391, 314);
             this.MinimizeBox = false;
+            this.MinimumSize = new System.Drawing.Size(391, 314);
             this.Name = "Form2";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "北斗微芯网络认证";
