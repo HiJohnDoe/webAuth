@@ -21,7 +21,12 @@ namespace webAuth
         {
             InitializeComponent();
         }
-        
+
+        string err_status_0 = "无法连接到远程服务器";
+        string err_status_1 = "请求被中止: 操作超时。";
+        string err_status_2 = "操作超时";
+        string err_status_3 = "无法连接到远程服务器";
+
         /// <summary>
         /// 窗口加载事件
         /// </summary>
@@ -48,14 +53,7 @@ namespace webAuth
         private async void Form1_Shown()
         {
             await Task.Delay(1000);
-            if (checkBox_autologin.Checked == true)
-            {
-                if (globalData.auto_login == true)
-                {
-                    globalData.auto_login = false;
-                    button_login.PerformClick();
-                }
-            }
+            timer1.Start();
         }
         private Dictionary<string, User> users = new Dictionary<string, User>();
 
@@ -97,10 +95,6 @@ namespace webAuth
             if ( flag_name && flag_pwd)
             {
                 string ip = GetLocalIp();
-                string err_status_0 = "无法连接到远程服务器";
-                string err_status_1 = "请求被中止: 操作超时。";
-                string err_status_2 = "操作超时";
-                string err_status_3 = "无法连接到远程服务器";
                 string login_status = err_status_0;
                 while (login_status == err_status_0 || login_status == err_status_1 || login_status == err_status_2 || login_status == err_status_3)
                 {
@@ -122,6 +116,7 @@ namespace webAuth
                         Form2 f2 =  new Form2();
                         f2.Show();
                         this.Hide();
+                        timer1.Stop();
                     }
                 }else
                 {
@@ -130,6 +125,7 @@ namespace webAuth
                     Form2 f2 = new Form2();
                     f2.Show();
                     this.Hide();
+                    timer1.Stop();
                 }
             }
         }
@@ -281,7 +277,7 @@ namespace webAuth
         }
 
         /// <summary>
-        /// 当用户名发生改变时的时间
+        /// 当用户名发生改变时的事件
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -360,6 +356,25 @@ namespace webAuth
             {
                 autoStart autoStart = new autoStart();
                 autoStart.SetMeAutoStart(false);
+            }
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            if (checkBox_autologin.Checked == true)
+            {
+                if (globalData.auto_login == true)
+                {
+
+                    if (globalData.relogin == true)
+                    {
+                        button_login.Text = "重连中";
+                        globalData.relogin = false;
+                    }
+                    globalData.auto_login = false;
+                    button_login.PerformClick();
+                    button_login.Text = "登录";
+                }
             }
         }
     }

@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.panel_login = new System.Windows.Forms.Panel();
             this.checkBox_autostart = new System.Windows.Forms.CheckBox();
@@ -40,6 +41,7 @@
             this.label_password = new System.Windows.Forms.Label();
             this.label_name = new System.Windows.Forms.Label();
             this.panel_logo = new System.Windows.Forms.Panel();
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.panel_login.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -157,6 +159,10 @@
             this.panel_logo.Size = new System.Drawing.Size(244, 66);
             this.panel_logo.TabIndex = 1;
             // 
+            // timer1
+            // 
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            // 
             // Form1
             // 
             this.AcceptButton = this.button_login;
@@ -194,6 +200,7 @@
         private System.Windows.Forms.ComboBox comboBox_username;
         private System.Windows.Forms.TextBox textBox_password;
         private System.Windows.Forms.CheckBox checkBox_autostart;
+        private System.Windows.Forms.Timer timer1;
     }
 }
 

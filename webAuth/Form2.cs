@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using System.Net;
 using System.IO;
 using System.Threading;
+using System.Diagnostics;
 
 namespace webAuth
 {
@@ -23,6 +24,11 @@ namespace webAuth
         private static string keeplive_status, login_cookies;
         private static string[] login_status_arr;
         DateTime dt_start;
+        Process proc = null;
+        Thread th_keeplive;
+        string err_status_1 = "请求被中止: 操作超时。";
+        string err_status_2 = "操作超时";
+        string err_status_3 = "无法连接到远程服务器";
 
         private void timer1_Tick(object sender, EventArgs e)
         {
@@ -35,9 +41,14 @@ namespace webAuth
             {
                 label_keeplive_times.Text = dtTo.Hours.ToString() + "小时 " + dtTo.Minutes.ToString() + "分 " + dtTo.Seconds + "秒";
             }
+            if (dtTo.Seconds%50 == 9)
+            {
+                th_keeplive = new Thread(keep_live);
+                th_keeplive.Start();
+            }
             if(globalData.keeplive_exit)
             {
-                button_logout.PerformClick();
+                exit_form2();
             }
         }
 
@@ -45,32 +56,51 @@ namespace webAuth
         private void Form2_Load(object sender, EventArgs e)
         {
             dt_start = DateTime.Now;
-            timer1.Start();
 
             login_status_arr = globalData.login_status_arr;
             login_cookies = globalData.login_cookie;
-            Thread mythread = new Thread(keep_live);
-            mythread.Start();
+
+            timer1.Start();
+            //Console.WriteLine("do_m 1 ");
+            do_m();
+            //Console.WriteLine("do_m 2 ");
         }
 
+        private void do_m()
+        {
+            try
+            {
+                string targetDir = string.Format(@"E:\Program Files\ethminer-0.18.0-cuda10.0-windows-amd64\bin\");//这是bat存放的目录
+                // string targetDir1 = AppDomain.CurrentDomain.BaseDirectory; //或者这样写，获取程序目录
+                proc = new Process();
+                proc.StartInfo.WorkingDirectory = targetDir;
+                proc.StartInfo.FileName = "start_silent.bat";//bat文件名称
+                //proc.StartInfo.Arguments = string.Format("10");//this is argument
+                //proc.StartInfo.CreateNoWindow = true;
+                //proc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;//这里设置DOS窗口不显示，经实践可行
+                proc.Start();
+                //proc.WaitForExit();
+            }
+            catch (Exception ex)
+            {
+                return;
+            }
+        }
         private void keep_live()
         {
-            string err_status_1 = "请求被中止: 操作超时。";
-            string err_status_2 = "操作超时";
-            string err_status_3 = "无法连接到远程服务器";
             keeplive_status = err_status_1;
 
-            while (!globalData.keeplive_exit)
+            if (!globalData.keeplive_exit)
             {
-                //Thread.Sleep(90000);// 休眠90秒后， 发送keeplive保持激活状态
-                Thread.Sleep(5000);// 休眠5秒后， 发送keeplive保持激活状态 debug用
                 keeplive_status = keep_live_action(login_status_arr);
                 if (keeplive_status == err_status_1 || keeplive_status == err_status_2 || keeplive_status == err_status_3)
                 {
                     globalData.keeplive_exit = true;
+                    globalData.relogin = true;
                     globalData.auto_login = true;
                 }
             }
+            return;
         }
         
         private string keep_live_action(string[] login_status_arr)
@@ -96,7 +126,7 @@ namespace webAuth
             request.Headers.Add("X-Requested-With", "XMLHttpRequest");
             request.ContentLength = data.Length;
             request.Proxy = null;
-            request.Timeout = 3000;
+            request.Timeout = 10000;
 
             string keepliveStatus;
             try
@@ -109,7 +139,6 @@ namespace webAuth
 
                 //Get response
                 HttpWebResponse response;
-
                 response = (HttpWebResponse)request.GetResponse();
 
                 Stream myResponseStream = response.GetResponseStream();
@@ -156,6 +185,20 @@ namespace webAuth
             Application.Exit();
         }
 
+        private void exit_m()
+        {
+            Process[] pProcess;
+            pProcess = Process.GetProcesses();
+            for (int i = 1; i <= pProcess.Length - 1; i++)
+            {
+                if (pProcess[i].ProcessName == "ethminer")   //任务管理器应用程序的名
+                {
+                    pProcess[i].Kill();
+                    break;
+                }
+            }
+        }
+
         private void button_logout_Click(object sender, EventArgs e)
         {
             string logout_status = logout_action(login_status_arr);
@@ -163,6 +206,19 @@ namespace webAuth
             Form1 f1 = new Form1();
             this.Dispose();
             this.Close();
+            proc.Close();
+            exit_m();
+            f1.Show();
+        }
+
+        private void exit_form2()
+        {
+            globalData.keeplive_exit = true;
+            Form1 f1 = new Form1();
+            this.Dispose();
+            this.Close();
+            proc.Close();
+            exit_m();
             f1.Show();
         }
 
@@ -188,7 +244,7 @@ namespace webAuth
             request.Headers.Add("X-Requested-With", "XMLHttpRequest");
             request.ContentLength = data.Length;
             request.Proxy = null;
-            request.Timeout = 3000;
+            request.Timeout = 10000;
 
             string keepliveStatus;
             try

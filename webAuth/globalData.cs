@@ -13,5 +13,6 @@ namespace webAuth
         public static string login_cookie;
         public static bool keeplive_exit = false;
         public static bool auto_login = true;
+        public static bool relogin = false;
     }
 }
