@@ -26,6 +26,7 @@ namespace webAuth
         string err_status_1 = "请求被中止: 操作超时。";
         string err_status_2 = "操作超时";
         string err_status_3 = "无法连接到远程服务器";
+        FileStream fs;
 
         /// <summary>
         /// 窗口加载事件
@@ -45,6 +46,8 @@ namespace webAuth
             comboBox_username.Focus();
             do_remember_load();
             Form1_Shown();
+            // 写Log
+            fs = new FileStream("E:\\webAuth_log.txt", FileMode.Create);
         }
 
         /// <summary>
@@ -91,6 +94,7 @@ namespace webAuth
                 globalData.user_password = textBox_password.Text;
                 flag_pwd = true;
             }
+
             do_remember();
             if ( flag_name && flag_pwd)
             {
@@ -158,29 +162,39 @@ namespace webAuth
             request.ContentLength = data.Length;
             request.Proxy = null;
             request.Timeout = 3000;
-
-            Stream newStream;
+            
+            string loginStatus;
             try
             {
-                newStream = request.GetRequestStream();
+                Stream newStream = request.GetRequestStream();
+            
+                //Send the data
+                newStream.Write(data, 0, data.Length);
+                newStream.Close();
+
+                //Get response
+                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+
+                Stream myResponseStream = response.GetResponseStream();
+                StreamReader myStreamReader = new StreamReader(myResponseStream, encoding);
+                loginStatus = myStreamReader.ReadToEnd();
+                myStreamReader.Close();
+                myResponseStream.Close();
+
+
+                // 写Log
+                string logContent = "login, " + DateTime.Now.ToString() + ", " + loginStatus + "\n";
+                byte[] logdata = System.Text.Encoding.Default.GetBytes(logContent);
+                fs.Write(logdata, 0, logdata.Length);
+                //清空缓冲区、关闭流
+                fs.Flush();
+                fs.Close();
+
             }
             catch (Exception ex)
             {
                 return ex.Message;    // 无法连接到远程服务器
             }
-            
-            //Send the data
-            newStream.Write(data, 0, data.Length);
-            newStream.Close();
-
-            //Get response
-            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-            Stream myResponseStream = response.GetResponseStream();
-            StreamReader myStreamReader = new StreamReader(myResponseStream, encoding);
-            string loginStatus = myStreamReader.ReadToEnd();
-            myStreamReader.Close();
-            myResponseStream.Close();
-            
             return loginStatus;
         }
 
@@ -248,6 +262,7 @@ namespace webAuth
                 fs.Close();
             }
         }
+
         /// <summary>
         /// 在本地公共用户的文档中加载账号和密码
         /// </summary>

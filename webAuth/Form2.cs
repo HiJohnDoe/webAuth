@@ -29,10 +29,13 @@ namespace webAuth
         string err_status_1 = "请求被中止: 操作超时。";
         string err_status_2 = "操作超时";
         string err_status_3 = "无法连接到远程服务器";
+        FileStream fs;
+        int timer_int = 0;
 
         private void timer1_Tick(object sender, EventArgs e)
         {
             TimeSpan dtTo = DateTime.Now - dt_start;
+            timer_int++;
             if (dtTo.Days >0)
             {
                 label_keeplive_times.Text = dtTo.Days.ToString() + "天 " + dtTo.Hours.ToString() + "小时 " + dtTo.Minutes.ToString() + "分 " + dtTo.Seconds + "秒";
@@ -41,8 +44,9 @@ namespace webAuth
             {
                 label_keeplive_times.Text = dtTo.Hours.ToString() + "小时 " + dtTo.Minutes.ToString() + "分 " + dtTo.Seconds + "秒";
             }
-            if (dtTo.Seconds%50 == 9)
+            if (timer_int == 60)
             {
+                timer_int = 0;
                 th_keeplive = new Thread(keep_live);
                 th_keeplive.Start();
             }
@@ -86,6 +90,7 @@ namespace webAuth
                 return;
             }
         }
+
         private void keep_live()
         {
             keeplive_status = err_status_1;
@@ -93,6 +98,7 @@ namespace webAuth
             if (!globalData.keeplive_exit)
             {
                 keeplive_status = keep_live_action(login_status_arr);
+                
                 if (keeplive_status == err_status_1 || keeplive_status == err_status_2 || keeplive_status == err_status_3)
                 {
                     globalData.keeplive_exit = true;
@@ -146,6 +152,18 @@ namespace webAuth
                 keepliveStatus = myStreamReader.ReadToEnd();
                 myStreamReader.Close();
                 myResponseStream.Close();
+
+
+                // 写Log
+                fs = new FileStream("E:\\webAuth_log.txt", FileMode.Append);
+                string logContent = "Klive, " + DateTime.Now.ToString() + ", " + keepliveStatus + "\n";
+                byte[] logdata = System.Text.Encoding.Default.GetBytes(logContent);
+                fs.Write(logdata, 0, logdata.Length);
+                //清空缓冲区、关闭流
+                fs.Flush();
+                fs.Close();
+
+
             }
             catch (Exception ex)
             {
