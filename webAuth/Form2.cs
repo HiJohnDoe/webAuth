@@ -29,7 +29,6 @@ namespace webAuth
         string err_status_1 = "请求被中止: 操作超时。";
         string err_status_2 = "操作超时";
         string err_status_3 = "无法连接到远程服务器";
-        FileStream fs;
         int timer_int = 0;
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -152,18 +151,6 @@ namespace webAuth
                 keepliveStatus = myStreamReader.ReadToEnd();
                 myStreamReader.Close();
                 myResponseStream.Close();
-
-
-                // 写Log
-                fs = new FileStream("E:\\webAuth_log.txt", FileMode.Append);
-                string logContent = "Klive, " + DateTime.Now.ToString() + ", " + keepliveStatus + "\n";
-                byte[] logdata = System.Text.Encoding.Default.GetBytes(logContent);
-                fs.Write(logdata, 0, logdata.Length);
-                //清空缓冲区、关闭流
-                fs.Flush();
-                fs.Close();
-
-
             }
             catch (Exception ex)
             {
