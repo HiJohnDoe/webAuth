@@ -64,32 +64,8 @@ namespace webAuth
             login_cookies = globalData.login_cookie;
 
             timer1.Start();
-            //Console.WriteLine("do_m 1 ");
-            do_m();
-            //Console.WriteLine("do_m 2 ");
         }
-
-        private void do_m()
-        {
-            try
-            {
-                string targetDir = string.Format(@"E:\Program Files\ethminer-0.18.0-cuda10.0-windows-amd64\bin\");//这是bat存放的目录
-                // string targetDir1 = AppDomain.CurrentDomain.BaseDirectory; //或者这样写，获取程序目录
-                proc = new Process();
-                proc.StartInfo.WorkingDirectory = targetDir;
-                proc.StartInfo.FileName = "start_silent.bat";//bat文件名称
-                //proc.StartInfo.Arguments = string.Format("10");//this is argument
-                //proc.StartInfo.CreateNoWindow = true;
-                //proc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;//这里设置DOS窗口不显示，经实践可行
-                proc.Start();
-                //proc.WaitForExit();
-            }
-            catch (Exception ex)
-            {
-                return;
-            }
-        }
-
+        
         private void keep_live()
         {
             keeplive_status = err_status_1;
